@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import psutil
 import paho.mqtt.publish as publish
 import sys
 import getopt
@@ -17,7 +18,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"b:")
     except getopt.GetoptError:
-        print("battery-status.py -b <broker-address>")
+        print("battery-status-win.py -b <broker-address>")
         sys.exit(1)
 
     # parse commandline arguments
@@ -26,20 +27,14 @@ def main(argv):
           broker_address = arg
 
     # publish battery status
-    with open("/sys/class/power_supply/BAT0/uevent", "r") as handle:
-        lines = handle.readlines()
-
+    battery = psutil.sensors_battery()
+    if ((battery.percent < 20 and not battery.power_plugged) or battery.percent == 100):
         payload = dict()
-        for line in lines:
-            key, val = line.strip().split('=')
-            payload[key] = val
+        payload['POWER_SUPPLY_CAPACITY'] = str(battery.percent)
+        payload['POWER_SUPPLY_STATUS'] = str(battery.power_plugged)
 
-        capacity = int(payload['POWER_SUPPLY_CAPACITY'])
-        power_status = payload['POWER_SUPPLY_STATUS'].lower()
-
-        if (capacity < 20 and power_status != 'charging') or capacity == 100:
-            encoded_payload = json.dumps(payload)
-            publish.single(topic=TOPIC, payload=encoded_payload, hostname=broker_address, client_id=CLIENT_ID)
+        encoded_payload = json.dumps(payload)
+        publish.single(topic=TOPIC, payload=encoded_payload, hostname=broker_address, client_id=CLIENT_ID)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
