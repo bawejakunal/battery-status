@@ -1,9 +1,12 @@
-This is a simple python script to report laptop battery status to an MQTT topic.
+This is a simple python script to report laptop battery status to an MQTT topic, implemented using [psutil](https://pypi.org/project/psutil/) cross platform library for querying battery status
 
-Install as a cron on Linux
+Installation steps:
 
-`*/5 * * * * <path to battery-status directory>/battery-status/battery-state.py -b <broker_address> &> /dev/null`
+1. `pip3 install -r requirements.txt` to install dependencies
+2. Install as a cron on Linux
 
-Install as a cron on Windows
+    - `*/5 * * * * <path to battery-status directory>/battery-status/battery-state.py -b <broker_address> &> /dev/null`
 
-`SCHTASKS /Create /SC MINUTE /MO 5 /TN batterystatus /TR  "C:\Users\<UserName>\AppData\Local\Microsoft\WindowsApps\python.exe" "<path to battery-status directory>\battery-status\battery-state-win.py" "-b" "<broker_address>"`
+3. Install as a cron on Windows
+
+    - `SCHTASKS /Create /SC MINUTE /MO 5 /TN batterystatus /TR  "C:\Users\<UserName>\AppData\Local\Microsoft\WindowsApps\python.exe" "<path to battery-status directory>\battery-status\battery-state.py" "-b" "<broker_address>"`
